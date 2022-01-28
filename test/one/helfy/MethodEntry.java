@@ -94,3 +94,25 @@ public class MethodEntry {
 
     private static native long rdtsc();
 }
+
+/*
+x64
+0:  0f 31                   rdtsc
+2:  48 c1 e2 20             shl    rdx,0x20
+6:  48 0b c2                or     rax,rdx
+9:  c3                      ret
+a:  cc                      int3
+b:  cc                      int3
+
+
+#elif defined(__x86_64__)
+
+static __inline__ unsigned long long rdtsc(void)
+{
+    unsigned hi, lo;
+    __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+    return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
+}
+
+#endif
+*/
