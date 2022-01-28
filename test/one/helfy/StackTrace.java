@@ -6,6 +6,23 @@ import java.nio.charset.StandardCharsets;
 public class StackTrace {
     static final JVM jvm = new JVM();
     static final int oopSize = jvm.intConstant("oopSize");
+    public static final int JVM_VER = getVersion();
+
+    /**
+     * Java 8 or lower: 1.6.0_23, 1.7.0, 1.7.0_80, 1.8.0_211
+     * Java 9 or higher: 9.0.1, 11.0.4, 12, 12.0.1
+     * if(getVersion() < 6) {..}
+     */
+    static int getVersion() {
+        String version = System.getProperty("java.version");
+        if (version.startsWith("1.")) {
+            version = version.substring(2, 3);
+        } else {
+            int dot = version.indexOf(".");
+            if (dot != -1) { version = version.substring(0, dot); }
+        } return Integer.parseInt(version);
+    }
+
 
     static class JavaThread {
         static final long _anchor = jvm.type("JavaThread").offset("_anchor");
@@ -24,7 +41,8 @@ public class StackTrace {
     static class Frame {
         static final long _name = jvm.type("CodeBlob").offset("_name");
         static final long _frame_size = jvm.type("CodeBlob").offset("_frame_size");
-        static final long _method = jvm.type("nmethod").offset("_method");
+        //static final long _method = jvm.type("nmethod").offset("_method");
+        static final long _method = JVM_VER <= 8 ? jvm.type("nmethod").offset("_method") : jvm.type("CompiledMethod").offset("_method");
 
         static final int slot_interp_bcp = -7;
         static final int slot_interp_locals = -6;
